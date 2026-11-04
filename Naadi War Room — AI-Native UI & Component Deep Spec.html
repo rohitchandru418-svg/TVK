@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Naadi — AI-Native War Room UI & Component Deep Spec</title>
+<style>
+:root {
+  --bg: #09090E;
+  --bg-panel: #0F0F17;
+  --bg-card: #14141E;
+  --bg-card-hover: #1A1A28;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
+  --text: #E8E8F0;
+  --text-secondary: #9090A8;
+  --text-muted: #5A5A70;
+  --accent: #E8291E;
+  --accent-navy: #1A1A2E;
+  --pulse: #00D4FF;
+  --t1: #FF3B30;
+  --t2: #FF9500;
+  --t3: #34C759;
+  --purple: #BF5AF2;
+  --gold: #FFD60A;
+  --font-sans: -apple-system, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: dark; }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(9,9,14,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 52px;
+  overflow-x: auto;
+}
+nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 32px;
+  flex-shrink: 0;
+  color: var(--text);
+  text-decoration: none;
+}
+.elephant-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+nav .brand span {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+}
+nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s;
+}
+nav a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+nav a.active { color: var(--pulse); }
+
+/* LAYOUT */
+.page { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* HERO */
+.hero {
+  padding: 80px 0 60px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 64px;
+}
+.hero-tag {
+  display: inline-block;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.3);
+  color: var(--pulse);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #E8E8F0 0%, #9090A8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero h1 span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+.hero p {
+  font-size: 17px;
+  color: var(--text-secondary);
+  max-width: 640px;
+  line-height: 1.65;
+  margin-bottom: 32px;
+}
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.hero-meta span {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.hero-meta span strong { color: var(--text-secondary); }
+
+/* SECTION */
+section {
+  margin-bottom: 80px;
+  scroll-margin-top: 72px;
+}
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+  margin-bottom: 8px;
+}
+.section-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 700px;
+  line-height: 1.65;
+  margin-bottom: 36px;
+}
+
+/* COMPONENTS */
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* WALL MOCKUP */
+.wall-container {
+  background: #030308;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+.wall-header {
+  background: rgba(0,212,255,0.04);
+  border-bottom: 1px solid rgba(0,212,255,0.12);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wall-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--pulse);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* PULSE STRIP */
+.pulse-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: rgba(0,212,255,0.03);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.pulse-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.pulse-source span {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+.pulse-bars {
+  display: flex;
+  gap: 1.5px;
+  align-items: flex-end;
+  height: 16px;
+}
+.pulse-bar {
+  width: 3px;
+  background: var(--pulse);
+  border-radius: 1px;
+  opacity: 0.8;
+}
+
+/* ENTITY PANELS */
+.wall-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 280px;
+  min-height: 280px;
+}
+.entity-panel {
+  padding: 20px 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.entity-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.entity-score {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.entity-score.negative { color: var(--t1); }
+.entity-score.positive { color: var(--t3); }
+.entity-score.mixed { color: var(--t2); }
+.entity-score-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: 10px;
+}
+.entity-breakdown {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.breakdown-item {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.breakdown-item strong { color: var(--text); }
+.entity-updated {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: auto;
+}
+.entity-toggle {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.toggle-btn {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.toggle-btn.active {
+  background: rgba(0,212,255,0.12);
+  border-color: rgba(0,212,255,0.3);
+  color: var(--pulse);
+}
+
+/* ALERT RAIL */
+.alert-rail {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.alert-card {
+  background: var(--bg-panel);
+  border-radius: 8px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--border);
+}
+.alert-card.t1 { border-left-color: var(--t1); }
+.alert-card.t2 { border-left-color: var(--t2); }
+.alert-card.t3 { border-left-color: var(--t3); }
+.alert-tier {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.t1 .alert-tier { color: var(--t1); }
+.t2 .alert-tier { color: var(--t2); }
+.t3 .alert-tier { color: var(--t3); }
+.alert-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+.alert-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.clock-bar {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+}
+.clock-seg {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--t2);
+}
+.clock-seg.empty { background: var(--border); }
+
+/* WALL FOOTER */
+.wall-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+  min-height: 100px;
+}
+.wall-footer-panel {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+}
+.wall-footer-panel:last-child { border-right: none; }
+.wall-footer-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.ally-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.ally-name {
+  font-size: 11px;
+  font-weight: 500;
+  width: 80px;
+  flex-shrink: 0;
+}
+.ally-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ally-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--t3);
+}
+.ally-bar-fill.warn { background: var(--t2); }
+.ally-bar-fill.alert { background: var(--t1); }
+.ally-tremor {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--t2);
+  flex-shrink: 0;
+}
+.story-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.story-sev-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.story-text {
+  font-size: 11px;
+  line-height: 1.4;
+  flex: 1;
+}
+.story-clock {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* SPEC BLOCKS */
+.spec-block {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.spec-block-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.spec-block-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.spec-block-tag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.spec-block-body {
+  padding: 20px;
+}
+
+/* STATE CHIPS */
+.state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.state-chip {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.state-chip-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.state-chip-value {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--pulse);
+  line-height: 1.5;
+}
+
+/* FIELD TABLE */
+.field-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.field-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+.field-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.field-table tr:last-child td { border-bottom: none; }
+.field-table td:first-child {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--pulse);
+  white-space: nowrap;
+}
+.field-table td:nth-child(2) {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.field-table td:nth-child(3) {
+  color: var(--text);
+}
+
+/* COMPONENT ANATOMY */
+.anatomy {
+  background: #05050C;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #7070A0;
+  line-height: 1.8;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+.anatomy .h { color: var(--text-secondary); }
+.anatomy .v { color: var(--pulse); }
+.anatomy .l { color: var(--t1); }
+.anatomy .o { color: var(--t3); }
+.anatomy .w { color: var(--t2); }
+.anatomy .m { color: var(--text-muted); }
+
+/* STORY CARD */
+.story-card-demo {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.story-card-top {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.story-card-title { font-size: 15px; font-weight: 600; line-height: 1.4; flex: 1; }
+.story-card-sev {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.sev-t1 { background: rgba(255,59,48,0.15); color: var(--t1); border: 1px solid rgba(255,59,48,0.3); }
+.sev-t2 { background: rgba(255,149,0,0.15); color: var(--t2); border: 1px solid rgba(255,149,0,0.3); }
+.story-card-meta {
+  padding: 12px 20px;
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.story-meta-item { font-size: 12px; color: var(--text-secondary); }
+.story-meta-item strong { color: var(--text); }
+.story-card-body { padding: 16px 20px; }
+
+/* ROSTER */
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.roster-item {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.roster-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.roster-spoken { background: var(--t3); }
+.roster-silent { background: var(--border); }
+.roster-notyet { background: var(--t2); }
+.roster-name { font-size: 11px; font-weight: 500; line-height: 1.3; }
+.roster-label { font-size: 9px; color: var(--text-muted); }
+
+/* CLOCK */
+.mileage-clock {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.clock-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.clock-state {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--t2);
+  margin-bottom: 4px;
+}
+.clock-state.open { color: var(--t3); }
+.clock-state.closing { color: var(--t2); }
+.clock-state.closed { color: var(--text-muted); }
+.clock-velocity {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 32px;
+  margin: 10px 0;
+}
+.cv-bar {
+  flex: 1;
+  border-radius: 2px;
+  background: rgba(0,212,255,0.3);
+  min-height: 2px;
+}
+.clock-prediction {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pred-band {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--t2);
+  background: rgba(255,149,0,0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* CONSTELLATION */
+.constellation {
+  background: #04040A;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.node {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+  border: 2px solid transparent;
+}
+.node.old-account { background: rgba(255,59,48,0.25); border-color: rgba(255,59,48,0.5); }
+.node.new-account { background: rgba(255,149,0,0.25); border-color: rgba(255,149,0,0.5); }
+.node.organic { background: rgba(52,199,89,0.2); border-color: rgba(52,199,89,0.4); }
+.const-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  gap: 16px;
+}
+.const-legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* CO-WORKER */
+.coworker-panel {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.12);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.coworker-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.coworker-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.coworker-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pulse);
+}
+.coworker-status {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.coworker-cursor::after {
+  content: '▌';
+  color: var(--pulse);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.coworker-text {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.citation-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(0,212,255,0.12);
+  border: 1px solid rgba(0,212,255,0.25);
+  color: var(--pulse);
+  border-radius: 4px;
+  padding: 0 5px;
+  margin: 0 1px;
+  font-family: var(--font-mono);
+  vertical-align: super;
+  font-size: 9px;
+}
+.coworker-reasoning {
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.coworker-reasoning span { font-family: var(--font-mono); font-size: 11px; }
+.conf-band {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 10px;
+}
+.conf-pill {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.conf-pill.filled { background: var(--pulse); }
+.conf-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* TONE LAB */
+.label-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.label-row:last-child { border-bottom: none; }
+.label-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.label-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.tag-neg { background: rgba(255,59,48,0.15); color: var(--t1); }
+.tag-pos { background: rgba(52,199,89,0.15); color: var(--t3); }
+.tag-sarcasm { background: rgba(191,90,242,0.15); color: var(--purple); }
+.tag-attack { background: rgba(255,149,0,0.15); color: var(--t2); }
+.tag-corrected { background: rgba(0,212,255,0.1); color: var(--pulse); }
+.pencil-icon {
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 2px;
+}
+
+/* PAGE SECTIONS */
+.page-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.page-nav-item {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.page-nav-item:hover { border-color: var(--border-strong); color: var(--text); }
+.page-nav-item.active {
+  background: rgba(0,212,255,0.1);
+  border-color: rgba(0,212,255,0.3);
+  color: var(--pulse);
+}
+
+/* FORMULA */
+.formula {
+  background: #03030A;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--t3);
+  line-height: 2;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+.formula .comment { color: var(--text-muted); }
+.formula .keyword { color: var(--pulse); }
+.formula .value { color: var(--gold); }
+
+/* DESK NAV */
+.desk-nav {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.desk-nav-item {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 7px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.desk-nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.desk-nav-item.active { background: rgba(0,212,255,0.1); color: var(--pulse); }
+.desk-nav-item.alert-dot {
+  position: relative;
+}
+.desk-nav-item.alert-dot::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--t1);
+}
+
+/* WHATSAPP */
+.whatsapp-card {
+  background: #0A1A0A;
+  border: 1px solid rgba(52,199,89,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 380px;
+  margin-bottom: 16px;
+}
+.wa-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.wa-icon {
+  width: 28px;
+  height: 28px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.wa-name { font-size: 13px; font-weight: 600; }
+.wa-time { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); margin-left: auto; }
+.wa-bubble {
+  background: rgba(37,211,102,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.wa-bubble .wa-emoji { font-size: 18px; }
+.wa-bubble .wa-line { margin-bottom: 4px; }
+.wa-bubble .wa-link {
+  color: var(--t3);
+  text-decoration: underline;
+  font-size: 12px;
+}
+.wa-tick { text-align: right; font-size: 11px; color: var(--t3); margin-top: 6px; }
+
+/* TIME MACHINE */
+.replay-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.replay-track {
+  position: relative;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin: 12px 0;
+}
+.replay-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--pulse), var(--accent));
+}
+.replay-markers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+.replay-event {
+  position: absolute;
+  top: -6px;
+  width: 2px;
+  height: 18px;
+  background: var(--t1);
+}
+.replay-event-label {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--t1);
+  white-space: nowrap;
+}
+
+/* LICENCE LADDER */
+.ladder {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 20px;
+}
+.ladder-rung {
+  flex: 1;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.ladder-rung.active {
+  background: rgba(0,212,255,0.06);
+  border-color: rgba(0,212,255,0.25);
+}
+.ladder-rung.probation {
+  background: rgba(255,149,0,0.05);
+  border-color: rgba(255,149,0,0.2);
+}
+.ladder-stage {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.probation .ladder-stage { color: var(--t2); }
+.active .ladder-stage { color: var(--pulse); }
+.ladder-rung:not(.active):not(.probation) .ladder-stage { color: var(--text-muted); }
+.ladder-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* CAMPAIGN ORG-INDEX */
+.organic-meter {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.organic-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+.organic-label span { font-family: var(--font-mono); font-size: 12px; color: var(--t1); }
+.organic-track {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.organic-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--t3), var(--t1));
+}
+
+/* CHIPS */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.chip-stale { background: rgba(142,142,147,0.15); color: var(--text-muted); }
+.chip-live { background: rgba(0,212,255,0.1); color: var(--pulse); }
+.chip-sampled { background: rgba(255,149,0,0.1); color: var(--t2); }
+.chip-corrected { background: rgba(52,199,89,0.1); color: var(--t3); }
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 48px 0;
+}
+
+/* RECEIPT DRAWER */
+.receipt-drawer {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.receipt-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.receipt-row {
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: grid;
+  grid-template-columns: 160px 80px 80px 1fr;
+  gap: 12px;
+  font-size: 11px;
+  align-items: center;
+}
+.receipt-row:last-child { border-bottom: none; }
+.receipt-row .handle { font-family: var(--font-mono); color: var(--pulse); }
+.receipt-row .influence { color: var(--text-secondary); }
+.receipt-row .label { }
+.receipt-row .reason { color: var(--text-muted); font-size: 10px; }
+
+/* WIDE RESPONSIVE */
+@media (max-width: 900px) {
+  .wall-body { grid-template-columns: 1fr 1fr; }
+  .alert-rail { display: none; }
+  .wall-footer { grid-template-columns: 1fr; }
+  .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .hero h1 { font-size: 32px; }
+  .wall-body { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .desk-nav { overflow-x: auto; flex-wrap: nowrap; }
+  .ladder { flex-direction: column; }
+  .receipt-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="brand">
+    <div class="elephant-icon">🐘</div>
+    <span>Naadi</span>
+  </a>
+  <a href="#philosophy">Design</a>
+  <a href="#wall">The Wall</a>
+  <a href="#pulse">Pulse Strip</a>
+  <a href="#entity">Entity Panels</a>
+  <a href="#alerts">Alerts</a>
+  <a href="#desk">The Desk</a>
+  <a href="#roster">Roster + Clock</a>
+  <a href="#constellation">Campaigns</a>
+  <a href="#tone-lab">Tone Lab</a>
+  <a href="#pocket">Pocket</a>
+  <a href="#time-machine">Time Machine</a>
+  <a href="#licence">Licence Ladder</a>
+  <a href="#ai-patterns">AI Patterns</a>
+</nav>
+
+<div class="page">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">UI & Component Deep Spec · Phase 1</div>
+  <h1>Naadi<br><span>War Room</span> Design</h1>
+  <p>AI-native operations room for TVK. Every component, every page, every AI interaction — deeply specified. Calm on the wall. Dense on the desk. Brief in the pocket.</p>
+  <div class="hero-meta">
+    <span><strong>Version</strong> 1.0 · Draft for CTO</span>
+    <span><strong>Date</strong> 2026-11-04</span>
+    <span><strong>Surfaces</strong> Wall · Desk · Pocket · CM Card</span>
+    <span><strong>Languages</strong> Tamil · English · Tanglish</span>
+  </div>
+</div>
+
+<!-- DESIGN PHILOSOPHY -->
+<section id="philosophy">
+  <div class="section-label">01 — Design Philosophy</div>
+  <div class="section-title">AI-native means the AI fills every surface, not a tab</div>
+  <div class="section-desc">The co-worker (elephant avatar) is not a chatbot in a drawer. It is the layer that explains every number, reasons through every alert, and streams its thinking into the surface the person is already on. No surface is static.</div>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-title">The Wall</div>
+      <h3>Calm, glanceable</h3>
+      <p>Readable from 6 metres. Max 3 alerts. No scrolling. Motion only for T1. The room must never feel like noise.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">The Desk</div>
+      <h3>Dense, keyboard-first</h3>
+      <p>Every number is a doorway. Split panes, bilingual, every label correctable, every alert assignable. 10-hour analyst home.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">The Pocket</div>
+      <h3>Brief, one tap to evidence</h3>
+      <p>WhatsApp templates. The lead must act in 90 seconds. Contains: what, who, clock state, evidence link. Nothing else.</p>
+    </div>
+  </div>
+
+  <div class="divider" style="margin: 32px 0;"></div>
+
+  <div class="grid grid-2">
+    <div class="spec-block">
+      <div class="spec-block-header">
+        <div class="spec-block-title">Colour Tokens</div>
+        <div class="spec-block-tag">Doctrine Pack overrides all</div>
+      </div>
+      <div class="spec-block-body">
+        <table class="field-table">
+          <thead><tr><th>Token</th><th>Default Value</th><th>Permitted Use</th></tr></thead>
+          <tbody>
+            <tr><td>--severity-t1</td><td>#FF3B30</td><td>T1 alert wall flash and border only</td></tr>
+            <tr><td>--severity-t2</td><td>#FF9500</td><td>T2 alert chip, closing window indicator</td></tr>
+            <tr><td>--severity-t3</td><td>#34C759</td><td>T3 feed chip, positive signal</td></tr>
+            <tr><td>--neutral</td><td>#8E8E93</td><td>Stale data, low confidence</td></tr>
+            <tr><td>--surface-wall</td><td>#0A0A0F</td><td>Wall background (never lighter)</td></tr>
+            <tr><td>--accent</td><td>Doctrine Pack</td><td>TVK: #E8291E red + #1A1A2E deep navy</td></tr>
+            <tr><td>--pulse</td><td>#00D4FF</td><td>Pulse Strip trace across all surfaces</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px; color: var(--text-muted); margin-top:12px;">Colour is never the only signal. Every severity state also uses an icon and a word. All sentiment colours pass WCAG AA.</p>
+      </div>
+    </div>
+    <div class="spec-block">
+      <div class="spec-block-header">
+        <div class="spec-block-title">Motion Rules</div>
+        <div class="spec-block-tag">Zero decorative transitions</div>
+      </div>
+      <div class="spec-block-body">
+        <table class="field-table">
+          <thead><tr><th>Event</th><th>Animation</th><th>Constraint</th></tr></thead>
+          <tbody>
+            <tr><td>T1 alert</td><td>2s slow border pulse, ease-in-out</td><td>Max 3 cycles then holds solid red border. Never strobe.</td></tr>
+            <tr><td>Pulse Strip</td><td>Smooth SVG path at 1 fps</td><td>Heartbeat, not noise</td></tr>
+            <tr><td>Metric update</td><td>Counter roll 400ms</td><td>Numbers roll, never snap</td></tr>
+            <tr><td>Desk panel slide</td><td>150ms ease-out</td><td>No bounce</td></tr>
+            <tr><td>Drawer open</td><td>200ms ease-out</td><td>No spring physics</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px; color: var(--text-muted); margin-top:12px;">No motion on the wall except T1 pulse and Pulse Strip. prefers-reduced-motion: all animations skip to end-state.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Typography Scale</div>
+      <div class="spec-block-tag">Tamil-first; English paired</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Use</th><th>Font</th><th>Size / Weight</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Wall entity name</td><td>Noto Sans Tamil</td><td>48px / 700</td><td>Readable at 6 m on 55″ 4K</td></tr>
+          <tr><td>Wall metric</td><td>Inter</td><td>72px / 800</td><td>+/−41%</td></tr>
+          <tr><td>Wall label</td><td>Noto Sans Tamil</td><td>20px / 400</td><td>"of 812 mentions"</td></tr>
+          <tr><td>Desk body</td><td>Noto Sans Tamil / Inter</td><td>14px / 400</td><td>Ascenders tested in dense tables</td></tr>
+          <tr><td>Desk heading</td><td>Inter</td><td>18px / 600</td><td>Section titles</td></tr>
+          <tr><td>Desk stat</td><td>Inter</td><td>24px / 700</td><td>Key counts on Now page</td></tr>
+          <tr><td>Mono (timestamps, handles)</td><td>JetBrains Mono</td><td>13px / 400</td><td>All times in IST 24h</td></tr>
+          <tr><td>Chip / badge</td><td>Inter</td><td>10px / 600 uppercase</td><td>T1 / SAMPLED / STALE</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px; color: var(--text-muted); margin-top:12px;">Numeral preference (Latin or Tamil digits) is per-user setting via config.numerals. Numbers use Indian system (lakhs, crores) with Western notation in a tooltip.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE WALL -->
+<section id="wall">
+  <div class="section-label">02 — The Wall</div>
+  <div class="section-title">16:9 big screen. Readable from 6 metres.</div>
+  <div class="section-desc">The wall is not a dashboard — it is a room-state. It answers one question: "where are we right now?" Every element is static until something genuinely warrants attention. Presentation-safe toggle hides private handles and internal notes in one tap.</div>
+
+  <div class="wall-container">
+    <div class="wall-header">
+      <div class="wall-label">🐘 Naadi War Room · IST 11:43 · <span style="color:var(--t3)">●</span> Live</div>
+      <div style="margin-left:auto; display:flex; gap:8px;">
+        <div class="chip chip-live">● X Live</div>
+        <div class="chip chip-stale">News 10:51</div>
+      </div>
+    </div>
+    <!-- PULSE STRIP -->
+    <div class="pulse-strip">
+      <div class="pulse-source">
+        <div class="pulse-bars">
+          <div class="pulse-bar" style="height:6px"></div>
+          <div class="pulse-bar" style="height:10px"></div>
+          <div class="pulse-bar" style="height:8px"></div>
+          <div class="pulse-bar" style="height:14px"></div>
+          <div class="pulse-bar" style="height:10px"></div>
+          <div class="pulse-bar" style="height:16px"></div>
+        </div>
+        <span>X</span>
+      </div>
+      <div class="pulse-source">
+        <div class="pulse-bars">
+          <div class="pulse-bar" style="height:8px; opacity:0.5"></div>
+          <div class="pulse-bar" style="height:5px; opacity:0.5"></div>
+          <div class="pulse-bar" style="height:9px; opacity:0.5"></div>
+          <div class="pulse-bar" style="height:6px; opacity:0.5"></div>
+          <div class="pulse-bar" style="height:4px; opacity:0.5"></div>
+          <div class="pulse-bar" style="height:7px; opacity:0.5"></div>
+        </div>
+        <span>News</span>
+      </div>
+      <div class="pulse-source">
+        <div class="pulse-bars">
+          <div class="pulse-bar" style="height:4px; background:var(--t2); opacity:0.6"></div>
+          <div class="pulse-bar" style="height:4px; background:var(--t2); opacity:0.6"></div>
+          <div class="pulse-bar" style="height:4px; background:var(--t2); opacity:0.6"></div>
+          <div class="pulse-bar" style="height:4px; background:var(--t2); opacity:0.6"></div>
+          <div class="pulse-bar" style="height:4px; background:var(--t2); opacity:0.6"></div>
+          <div class="pulse-bar" style="height:4px; background:var(--t2); opacity:0.6"></div>
+        </div>
+        <span style="color:var(--t2)">TV / YT ·stale 10:51</span>
+      </div>
+      <div class="pulse-source">
+        <div class="pulse-bars">
+          <div class="pulse-bar" style="height:8px; background:var(--t3)"></div>
+        </div>
+        <span>E-paper ✓</span>
+      </div>
+      <div class="pulse-source">
+        <div class="pulse-bars">
+          <div class="pulse-bar" style="height:8px; background:var(--t3)"></div>
+        </div>
+        <span>WhatsApp ✓</span>
+      </div>
+      <div class="pulse-source" style="margin-left:auto;">
+        <div class="pulse-bars">
+          <div class="pulse-bar" style="height:10px; background:var(--pulse)"></div>
+          <div class="pulse-bar" style="height:14px; background:var(--pulse)"></div>
+          <div class="pulse-bar" style="height:8px; background:var(--pulse)"></div>
+        </div>
+        <span style="color:var(--pulse)">AI ▌</span>
+      </div>
+    </div>
+    <!-- ENTITY PANELS + ALERT RAIL -->
+    <div class="wall-body">
+      <!-- TVK Panel -->
+      <div class="entity-panel" style="border-left: 2px solid var(--t1);">
+        <div class="entity-name">TVK</div>
+        <div class="entity-score negative">−41%</div>
+        <div class="entity-score-sub">+34% pos · of 812 men.</div>
+        <div class="entity-breakdown">
+          <div class="breakdown-item"><strong>Top:</strong> @natnl_jrnlst</div>
+          <div class="breakdown-item" style="color:var(--t1)">↑ +12% / 30m</div>
+        </div>
+        <div class="entity-toggle">
+          <button class="toggle-btn active">weighted</button>
+          <button class="toggle-btn">raw</button>
+        </div>
+        <div class="entity-updated">upd 11:41 · X + News · 812 men.</div>
+      </div>
+      <!-- CM Panel -->
+      <div class="entity-panel">
+        <div class="entity-name">CM Vijay</div>
+        <div class="entity-score mixed">+18%</div>
+        <div class="entity-score-sub">−22% neg · of 234 men.</div>
+        <div class="entity-breakdown">
+          <div class="breakdown-item" style="color:var(--t3)">stable</div>
+        </div>
+        <div class="entity-toggle">
+          <button class="toggle-btn active">weighted</button>
+          <button class="toggle-btn">raw</button>
+        </div>
+        <div class="entity-updated">upd 11:40 · 234 men.</div>
+      </div>
+      <!-- AadhavArjuna Panel -->
+      <div class="entity-panel">
+        <div class="entity-name">AadhavArjuna</div>
+        <div class="entity-score negative">not enough data</div>
+        <div class="entity-score-sub">18 of 30 needed</div>
+        <div class="entity-breakdown"></div>
+        <div class="entity-updated">upd 11:39 · 18 men.</div>
+      </div>
+      <!-- Alert Rail -->
+      <div class="alert-rail">
+        <div style="font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); padding: 0 4px; margin-bottom:4px;">ALERTS</div>
+        <div class="alert-card t1">
+          <div class="alert-tier">① T1 · Response Opportunity</div>
+          <div class="alert-title">No TVK response · others condemning councillor remark</div>
+          <div class="alert-meta">3 reactors · 00:23 ago</div>
+          <div class="clock-bar">
+            <div class="clock-seg"></div>
+            <div class="clock-seg"></div>
+            <div class="clock-seg"></div>
+            <div class="clock-seg empty"></div>
+          </div>
+          <div class="alert-meta" style="margin-top:4px; color:var(--t2)">OPEN · closing ~18 min</div>
+        </div>
+        <div class="alert-card t2">
+          <div class="alert-tier">② T2 · High Influence</div>
+          <div class="alert-title">Nat'l journalist (1.2M) posted against CM</div>
+          <div class="alert-meta">verified · 4,000 reposts / 20 min</div>
+        </div>
+        <div class="alert-card t3">
+          <div class="alert-tier">③ T3 · Coordination Signal</div>
+          <div class="alert-title">Possible coordinated push · confidence Medium</div>
+          <div class="alert-meta">~300 accts, 70% &lt;3 months old</div>
+        </div>
+      </div>
+    </div>
+    <!-- WALL FOOTER: Ally Mood + Rising Stories -->
+    <div class="wall-footer">
+      <div class="wall-footer-panel">
+        <div class="wall-footer-title">Ally Mood</div>
+        <div class="ally-row">
+          <div class="ally-name">DMK</div>
+          <div class="ally-bar-track"><div class="ally-bar-fill" style="width:78%"></div></div>
+          <div class="ally-tremor">stable</div>
+        </div>
+        <div class="ally-row">
+          <div class="ally-name">Congress TN</div>
+          <div class="ally-bar-track"><div class="ally-bar-fill warn" style="width:52%"></div></div>
+          <div class="ally-tremor">◉ tremor</div>
+        </div>
+        <div class="ally-row">
+          <div class="ally-name">VCK</div>
+          <div class="ally-bar-track"><div class="ally-bar-fill" style="width:85%"></div></div>
+          <div class="ally-tremor">stable</div>
+        </div>
+      </div>
+      <div class="wall-footer-panel">
+        <div class="wall-footer-title">Rising Stories (window closing soonest)</div>
+        <div class="story-row">
+          <div class="story-sev-dot" style="background:var(--t1)"></div>
+          <div class="story-text">Councillor remark at DMK function · 9 outlets, 1,200 posts</div>
+          <div class="story-clock" style="color:var(--t1)">OPEN · ~18m</div>
+        </div>
+        <div class="story-row">
+          <div class="story-sev-dot" style="background:var(--t2)"></div>
+          <div class="story-text">Cabinet decision — Congress MLA posts · 2 outlets</div>
+          <div class="story-clock" style="color:var(--t2)">CLOSING</div>
+        </div>
+        <div class="story-row">
+          <div class="story-sev-dot" style="background:var(--t3)"></div>
+          <div class="story-text">Welfare milestone announced · 14 outlets</div>
+          <div class="story-clock">OPEN</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WALL COMPONENT SPEC -->
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Wall Layout Grid</div>
+      <div class="spec-block-tag">16:9 · 3840×2160 target · no scrolling</div>
+    </div>
+    <div class="spec-block-body">
+      <div class="anatomy">
+<span class="h">┌─ Pulse Strip (40px fixed) ────────────────────────────────────────────┐</span>
+<span class="m">│  X ▂▃▂▃  News ▂▃▂▂  TV ▂▂▃  E-paper ✓  WhatsApp ✓  AI ▂▃  stale=flat│</span>
+<span class="h">├──────────┬──────────┬──────────┬────────────────────────────────────────┤</span>
+<span class="m">│ ENTITY   │ ENTITY   │ ENTITY   │  ALERTS RAIL (max 3, ranked T1→T3)    │</span>
+<span class="v">│ TVK      │ CM Vijay │ Aadhav   │  ① T1 Response Opportunity            │</span>
+<span class="l">│ −41%     │ +18%     │ no data  │     "No TVK response · 3 reacting"    │</span>
+<span class="m">│ of 812   │ of 234   │ 18/30    │     Clock: OPEN ▮▮▮▯ · ~18 min       │</span>
+<span class="m">│ weighted │          │          │  ② T2 Influence · nat'l journalist    │</span>
+<span class="m">│ raw      │          │          │  ③ T3 Coordination signal · Medium    │</span>
+<span class="h">├──────────┴──────────┴──────────┼────────────────────────────────────────┤</span>
+<span class="m">│ ALLY MOOD (seismograph)        │  RISING STORIES (by window closing)    │</span>
+<span class="o">│ DMK ████████░░ stable          │  ● Councillor remark · OPEN ~18m       │</span>
+<span class="w">│ Congress ████░░░░ ◉ tremor     │  ● Cabinet decision · CLOSING          │</span>
+<span class="o">│ VCK ████████░░ stable          │  ● Welfare milestone · OPEN            │</span>
+<span class="h">└────────────────────────────────┴────────────────────────────────────────┘</span>
+      </div>
+      <table class="field-table">
+        <thead><tr><th>Zone</th><th>Height</th><th>Purpose</th><th>AI role</th></tr></thead>
+        <tbody>
+          <tr><td>Pulse Strip</td><td>40px fixed</td><td>Source heartbeat — a flat line means a problem</td><td>AI monitors pipeline lag per stage; stale state triggers when last-ok > threshold</td></tr>
+          <tr><td>Entity panels (×3)</td><td>~55% of body</td><td>Weighted sentiment per principal entity</td><td>AI computes weighted score every 60s; confidence band determines if score shows or "not enough data" shows</td></tr>
+          <tr><td>Alert rail</td><td>~55% of body</td><td>Top 3 alerts ranked by severity</td><td>AI ranks, groups related posts, writes 2-line explanation, flashes T1 border</td></tr>
+          <tr><td>Ally Mood</td><td>~45% of body</td><td>Per-ally sentiment seismograph</td><td>AI detects tremors against 30-day ally baseline; tremor dot fires when z ≥ 2</td></tr>
+          <tr><td>Rising Stories</td><td>~45% of body</td><td>Stories by window closing soonest</td><td>AI predicts window close from velocity curve against similar past stories</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="state-grid">
+    <div class="state-chip"><div class="state-chip-label">Default</div><div class="state-chip-value">Live data · all panels active</div></div>
+    <div class="state-chip"><div class="state-chip-label">Stale Source</div><div class="state-chip-value" style="color:var(--t2)">Panel grey · "data delayed since HH:MM · X"</div></div>
+    <div class="state-chip"><div class="state-chip-label">Not Enough Data</div><div class="state-chip-value">Chip replaces % · never 0 or dash</div></div>
+    <div class="state-chip"><div class="state-chip-label">T1 Flash</div><div class="state-chip-value" style="color:var(--t1)">Border pulse 2s × 3 · then holds red</div></div>
+    <div class="state-chip"><div class="state-chip-label">Presentation Safe</div><div class="state-chip-value">1-tap toggle · hides private handles + internal notes</div></div>
+    <div class="state-chip"><div class="state-chip-label">Acknowledged</div><div class="state-chip-value" style="color:var(--t3)">Flash clears · "taken by Meena 11:44"</div></div>
+  </div>
+</section>
+
+<!-- PULSE STRIP -->
+<section id="pulse">
+  <div class="section-label">03 — Pulse Strip Component</div>
+  <div class="section-title">A flat line is never "quiet". It is a problem.</div>
+  <div class="section-desc">The Pulse Strip is a thin heartbeat line across the top of every surface. One trace per source. The wall must never fool anyone into thinking silence means nothing is happening.</div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Per-Source Trace Specification</div>
+      <div class="spec-block-tag">component: PulseStrip</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Source</th><th>Live state</th><th>Stale state (after threshold)</th><th>Down state</th><th>Stale threshold</th></tr></thead>
+        <tbody>
+          <tr><td>X API</td><td>Animated bars, --pulse colour, height = recent volume relative to 15m baseline</td><td>Flat red bar · "X stale HH:MM"</td><td>"X outage" · red chip · admin alerted</td><td>5 min since last item</td></tr>
+          <tr><td>News feeds</td><td>Animated bars, 70% opacity (secondary source)</td><td>Flat red · source name</td><td>Crawler health shown; "never 'no new articles'"</td><td>60 min since last item (source-type floor from CTO)</td></tr>
+          <tr><td>TV / YouTube</td><td>Animated bars, 60% opacity</td><td>Amber flat bar · "TV stale HH:MM"</td><td>Per-channel health card in Admin</td><td>120 min</td></tr>
+          <tr><td>E-paper</td><td>Static ✓ when today's edition ingested</td><td>"E-paper: no edition today" (expected delivery window per publisher)</td><td>OCR health flag in Admin</td><td>Expected delivery + 2h</td></tr>
+          <tr><td>WhatsApp delivery</td><td>✓ · last delivered HH:MM</td><td>"WA undelivered" amber</td><td>"WA failed" red · in-app escalation</td><td>First retry fail</td></tr>
+          <tr><td>AI model</td><td>Animated bars --pulse colour; pulsing ▌ when answering</td><td>"AI stale" · co-worker shows "data may be old"</td><td>"AI down · rules-only alerts active"</td><td>30s no response</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">Implementation note: stage timestamps on every item make pipeline lag measurable. The Pulse Strip reads from source_health table, not from inference. Pulse Strip appears on Wall (top), Desk (collapsed in nav header), and CM Card (one-line summary at the foot).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ENTITY PANELS -->
+<section id="entity">
+  <div class="section-label">04 — Entity Sentiment Panels</div>
+  <div class="section-title">Every number is a doorway, not a headline.</div>
+  <div class="section-desc">TVK · CM Vijay · AadhavArjuna · all parties. Weighted score always shown beside raw. Tap opens the receipts drawer: the mentions behind the number, reasons on labels, top 3 contributors, what changed.</div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Entity Panel — All States & Fields</div>
+      <div class="spec-block-tag">component: EntityPanel</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Field</th><th>Source</th><th>Display rule</th></tr></thead>
+        <tbody>
+          <tr><td>entity_name</td><td>Doctrine Pack config.entities[id].display_name</td><td>Tamil name if locale ta; English name if locale en</td></tr>
+          <tr><td>weighted_score</td><td>Computed: Σ(Ia × N × M × E) normalised</td><td>Shown as −41% / +34% split (neg left, pos right). Colour: neg = --t1, pos = --t3, ≤±5% from last = --neutral. Never shown alone — always paired with raw.</td></tr>
+          <tr><td>raw_score</td><td>Simple count of negative / positive labels</td><td>Toggle between weighted and raw in one tap. Both views always available.</td></tr>
+          <tr><td>denominator</td><td>mention count in current window</td><td>"of 812 mentions" always visible. If &lt;30: "not enough data (N of 30 needed)" chip replaces the score.</td></tr>
+          <tr><td>trend_arrow</td><td>z-score vs 15-min rolling window</td><td>↑ or ↓ only when z ≥ 2 against rolling baseline; otherwise flat line. Never decorative.</td></tr>
+          <tr><td>velocity</td><td>Change in negative mentions per 15 min</td><td>"+12% in 30 min" in --t1 when rising; suppressed when flat</td></tr>
+          <tr><td>top_contributor</td><td>Account with highest single-item Ia score</td><td>"Top: @handle (Ia: 0.87)" — one click to that mention's receipt</td></tr>
+          <tr><td>cap_note</td><td>Single-account post-cap (default 5%)</td><td>When top contributor accounts for ≥ 5% of score: "1 account driving 5% cap" chip shown</td></tr>
+          <tr><td>last_updated</td><td>stage_timestamps.display on latest processed item</td><td>"upd HH:MM" in monospace. If stale: "data delayed since HH:MM · X" in amber</td></tr>
+          <tr><td>window</td><td>config.sentiment_window (default: last 60 min)</td><td>Shown as "last 60 min" in tooltip; can be switched to 15m / 6h / 24h from desk</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Receipts Drawer — opened by tapping any number</div>
+      <div class="spec-block-tag">component: ReceiptsDrawer</div>
+    </div>
+    <div class="spec-block-body">
+      <div class="receipt-drawer">
+        <div class="receipt-header">
+          <span>TVK · Negative mentions · 11:00–11:43 · 338 of 812</span>
+          <span style="font-size:11px; color:var(--text-muted)">weighted | raw ⇄ · export CSV</span>
+        </div>
+        <div class="receipt-row" style="background:rgba(255,59,48,0.04);">
+          <span class="handle">@natnl_jrnlst</span>
+          <span class="influence">Ia 0.90 · T1</span>
+          <span class="label"><span class="tag tag-neg">Negative</span></span>
+          <span class="reason">verified · 1.2M · national media · attack=true · named source</span>
+        </div>
+        <div class="receipt-row">
+          <span class="handle">@state_news_tn</span>
+          <span class="influence">Ia 0.72 · T2</span>
+          <span class="label"><span class="tag tag-neg">Negative</span></span>
+          <span class="reason">state media · article · anonymous insinuation</span>
+        </div>
+        <div class="receipt-row">
+          <span class="handle">@sarcasm_post_01</span>
+          <span class="influence">Ia 0.08 · T3</span>
+          <span class="label"><span class="tag tag-pos">Positive</span> <span class="tag tag-sarcasm">sarcasm</span></span>
+          <span class="reason">sarcastic support · effective polarity = positive. <span class="tag tag-corrected">Corrected by Meena</span></span>
+        </div>
+      </div>
+      <table class="field-table">
+        <thead><tr><th>Receipt field</th><th>Always shown</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>author / outlet</td><td>Yes</td><td>Hidden in presentation-safe mode if not public actor</td></tr>
+          <tr><td>engagement</td><td>Yes</td><td>Reposts / likes / replies at time of labelling</td></tr>
+          <tr><td>posted_at</td><td>Yes</td><td>IST HH:MM:SS in monospace</td></tr>
+          <tr><td>label + reason</td><td>Yes</td><td>Every label shows reason text; sarcasm shown as separate flag</td></tr>
+          <tr><td>confidence</td><td>Yes</td><td>0–1 shown as Low/Medium/High pill</td></tr>
+          <tr><td>corrected_by</td><td>When corrected</td><td>"Corrected by [name] · original: Negative · reason: sarcastic support"</td></tr>
+          <tr><td>original link</td><td>Yes</td><td>Direct URL to original post/article</td></tr>
+          <tr><td>model_version</td><td>Tooltip</td><td>For reproducibility audit</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ALERTS -->
+<section id="alerts">
+  <div class="section-label">05 — Alerts Rail</div>
+  <div class="section-title">Ranked by severity. Max 3 on the wall. Related grouped.</div>
+  <div class="section-desc">The wall shows at most 3 alerts. T1 flashes and goes to WhatsApp. T2 stays in-app. T3 is feed only. Anyone can acknowledge — it clears for everyone with "taken by [name]".</div>
+
+  <div class="grid grid-2">
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Alert Card — Fields & Behaviour</div>
+          <div class="spec-block-tag">component: AlertCard</div>
+        </div>
+        <div class="spec-block-body">
+          <table class="field-table">
+            <thead><tr><th>Field</th><th>T1</th><th>T2</th><th>T3</th></tr></thead>
+            <tbody>
+              <tr><td>tier badge</td><td>T1 · red</td><td>T2 · amber</td><td>T3 · green</td></tr>
+              <tr><td>title</td><td>AI-written, 1 line, reason</td><td>AI-written, 1 line</td><td>AI-written, 1 line</td></tr>
+              <tr><td>explanation</td><td>2 lines, expanded</td><td>2 lines, collapsed</td><td>1 line</td></tr>
+              <tr><td>evidence tap</td><td>Always visible</td><td>Always visible</td><td>Tap to expand</td></tr>
+              <tr><td>Ack button</td><td>Prominent</td><td>Present</td><td>Present</td></tr>
+              <tr><td>Assign button</td><td>Present</td><td>Present</td><td>—</td></tr>
+              <tr><td>Wall flash</td><td>Border pulse</td><td>No</td><td>No</td></tr>
+              <tr><td>WhatsApp</td><td>Sent to leads</td><td>No</td><td>No</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Severity Formula</div>
+          <div class="spec-block-tag">§4b Detection Spec</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="formula">
+<span class="comment"># Item severity</span>
+<span class="keyword">S_item</span>  = Ia × N × max(M, M_floor) × E
+
+<span class="comment"># Story severity (noisy-or over top-k items)</span>
+<span class="keyword">S_story</span> = 1 − PRODUCT(1 − S_item)   <span class="comment"># capped at 1</span>
+
+<span class="comment"># Tiers (default; versioned in Doctrine Pack)</span>
+T1: S_story <span class="value">≥ 0.40</span>  → wall flash + WhatsApp
+T2: S_story <span class="value">0.20–0.40</span> → in-app only
+T3: S_story <span class="value">&lt;0.20</span>  → feed only
+
+<span class="comment"># Sanity check examples</span>
+<span class="comment"># Nat'l journalist (Ia 0.90, N 0.90, M 0.60, E 1.0) = 0.49 → T1</span>
+<span class="comment"># 40-follower account (Ia 0.10, N 0.90, M 0.20)      = 0.02 → T3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Alert Lifecycle States</div>
+          <div class="spec-block-tag">component: AlertCard · all states</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="state-grid" style="grid-template-columns: 1fr;">
+            <div class="state-chip"><div class="state-chip-label">Firing</div><div class="state-chip-value">Border pulse (T1). AI explanation streaming ▌. WhatsApp queued.</div></div>
+            <div class="state-chip"><div class="state-chip-label">Acknowledged</div><div class="state-chip-value" style="color:var(--t3)">Flash clears for everyone. "Taken by Meena · 11:44". Remains on wall for context.</div></div>
+            <div class="state-chip"><div class="state-chip-label">Assigned</div><div class="state-chip-value">Assigned to [name] shown. Owners see it in their queue on the desk.</div></div>
+            <div class="state-chip"><div class="state-chip-label">Grouped</div><div class="state-chip-value">Related posts merged under one alert. Tap to expand. Never floods.</div></div>
+            <div class="state-chip"><div class="state-chip-label">Cleared</div><div class="state-chip-value" style="color:var(--text-muted)">Removed from wall after close. Visible in Alerts history on desk.</div></div>
+            <div class="state-chip"><div class="state-chip-label">WhatsApp fail</div><div class="state-chip-value" style="color:var(--t2)">"WhatsApp not delivered" shown in-app. Lead notified. Retry queued.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Influence Score Formula</div>
+          <div class="spec-block-tag">§3 Detection Spec</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="formula">
+<span class="keyword">Ia</span> = clamp( 0.30×F + 0.20×V + 0.35×T + 0.15×C ) × A
+
+F = min(1, log10(1 + followers) / 7)
+    <span class="comment"># 10M followers → 1.0</span>
+
+V = staff "notable/official" flag: <span class="value">1.0</span>
+    paid-verified only: <span class="value">0.3</span>  |  none: <span class="value">0</span>
+
+T = national media <span class="value">1.00</span> | party leader <span class="value">0.90</span>
+    state media <span class="value">0.80</span> | influencer <span class="value">0.60</span>
+    local/known <span class="value">0.40</span> | unknown <span class="value">0.10</span>
+
+A = authenticity <span class="value">0.30–1.00</span> (bot suspicion down-weights)
+<span class="comment"># All weights versioned; every change audit-logged</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE DESK -->
+<section id="desk">
+  <div class="section-label">06 — The Desk (Web App)</div>
+  <div class="section-title">Every page, every component, every AI interaction.</div>
+  <div class="section-desc">The desk is the analyst's home. Keyboard-first. Dense tables. Every number a doorway. Split panes. Bilingual. 13 navigation items, each a distinct surface with its own AI role.</div>
+
+  <div class="desk-nav">
+    <div class="desk-nav-item active">Now</div>
+    <div class="desk-nav-item alert-dot">Stories</div>
+    <div class="desk-nav-item alert-dot">Alerts</div>
+    <div class="desk-nav-item">Response Queue</div>
+    <div class="desk-nav-item">Allies</div>
+    <div class="desk-nav-item">Campaigns</div>
+    <div class="desk-nav-item">Tone Lab</div>
+    <div class="desk-nav-item">Clippings</div>
+    <div class="desk-nav-item">Ask</div>
+    <div class="desk-nav-item">Settings</div>
+    <div class="desk-nav-item">Time Machine</div>
+    <div class="desk-nav-item">Admin</div>
+  </div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Page Specifications — All 13 Nav Items</div>
+      <div class="spec-block-tag">desk navigation</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Page</th><th>Primary components</th><th>AI role on this page</th><th>Key interactions</th></tr></thead>
+        <tbody>
+          <tr><td>Now</td><td>Wall picture (same layout as wall, slightly smaller), My Assignments rail, Open Alerts list, Pulse Strip expanded</td><td>AI explanation chip on each active alert; streaming updates to open items; co-worker mini-panel bottom-right</td><td>Ack / assign alerts; tap any number for receipts; switch to presentation-safe</td></tr>
+          <tr><td>Stories</td><td>Kanban board: columns Open Window / Closing / Closed / Unattributed. Each card: Mileage Clock chip, reach split, severity chip, TVK status dot, owner avatar</td><td>AI clusters Mentions into stories; AI predicts window close time; AI writes story title from top Mentions</td><td>Filter by entity / source / date; merge stories; split story; bulk assign; sort by window closing</td></tr>
+          <tr><td>Story Page</td><td>Header (title, clock state, severity, owner), Reaction Roster, Origin Trace tree, Receipts list, Co-worker panel, Actions bar</td><td>AI populates Reaction Roster from expected reactors; AI writes 2-line explanation; AI suggests response kind; AI detects TVK response</td><td>Acknowledge; assign; mark acted / not needed; merge/split; correct a label; ask co-worker follow-up</td></tr>
+          <tr><td>Alerts</td><td>Alert list (all tiers); filter by tier / entity / status; detail drawer with full evidence</td><td>AI groups related alerts; AI writes reason per alert; AI flags when alert dismissed-rate is high</td><td>Filter; ack; assign; drill to story; export</td></tr>
+          <tr><td>Response Queue</td><td>Queue sorted by window-closing-soonest; each item: suggested response kind, roster summary, TVK status, Mileage Clock state</td><td>AI suggests response kind (condemn / rebut / congratulate / condole / claim-credit); AI detects TVK response; AI records outcome in Mileage Ledger</td><td>Mark acted (with time-to-response recorded); mark not needed (with reason); drill to story</td></tr>
+          <tr><td>Allies</td><td>Ally Mood seismograph per ally; per-issue breakdown; tremor history; people + posts per ally</td><td>AI detects tremor per figure against 30-day baseline; AI flags when ≥2 ally figures tremor within 6h; AI holds CM-blaming text for lead review</td><td>Drill to ally public figure; view posts; mark tremor as noise; override threshold</td></tr>
+          <tr><td>Campaigns</td><td>Network constellation view; timing strip; organic-ness index; evidence pack; attribution panel (locked until lead confirms)</td><td>AI runs coordination detection; AI computes organic-ness index; AI writes evidence pack; AI never names a party — human must confirm</td><td>View cluster; expand evidence; confirm attribution (lead only); mark as noise; track spread timeline</td></tr>
+          <tr><td>Tone Lab</td><td>Lexicon list with examples; label queue of low-confidence items; per-language accuracy chart; sarcasm cases; "how I read this" panel</td><td>AI shows reasoning per label; AI flags when correction rate rises for a capability; AI tracks week-on-week accuracy</td><td>Add lexicon term with examples; correct label inline; add sarcasm example; approve/reject AI suggestion</td></tr>
+          <tr><td>Clippings</td><td>Upload dropzone (batch drag-and-drop); processing status per clipping; "check scan" queue; page preview; OCR text with confidence</td><td>AI runs Tamil OCR; AI marks low-confidence text as "check scan"; AI links clipping to existing Story if entity + topic match</td><td>Upload batch; approve / correct OCR text; link to story; mark edition checked</td></tr>
+          <tr><td>Ask</td><td>Chat interface; language auto-switches; citation chips on every claim; evidence panel alongside answers; confidence indicator</td><td>AI answers in Tamil or English; cites Mentions by ID; says "not enough data" when true; never invents numbers; first answer ≤10s</td><td>Ask in Tamil or English; tap citation to expand source; mark answer useful/not-useful; drill to story from answer</td></tr>
+          <tr><td>Settings</td><td>Doctrine Pack data with version history and diff view; audit log; threshold editor; entity/relationship editor; tier editor; recipient config</td><td>AI shows diff when a setting is changed; AI flags when a threshold change would have altered past alert outcomes (via Time Machine link)</td><td>Edit watch terms; change relationship tag; update tiers; configure recipients/quiet hours; review version history</td></tr>
+          <tr><td>Time Machine</td><td>Window picker; threshold slider; replay run launcher; "would have alerted" vs actual comparison; DRILL launcher</td><td>AI re-runs the full pipeline on historical raw items with chosen thresholds; AI flags discrepancies vs actual alerts; AI tags DRILL events</td><td>Pick window; adjust thresholds; run replay; view must-pass scenario results; launch drill</td></tr>
+          <tr><td>Admin</td><td>Source health cards; crawler health; X usage vs cap (50/80/95% alert); missed-item audit; licence report cards; correction/bias dashboard</td><td>AI summarises filter-recall sample weekly; AI flags when correction rate by person exceeds bias threshold; AI reports licence stage per capability</td><td>View source health; resolve crawler issue; review usage; run filter audit; promote/demote licence stage; view bias dashboard</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- REACTION ROSTER + MILEAGE CLOCK -->
+<section id="roster">
+  <div class="section-label">07 — Reaction Roster + Mileage Clock</div>
+  <div class="section-title">Silence is a first-class signal. The roster makes it visible.</div>
+  <div class="section-desc">For every Story, a roster of expected reactors — allies, opposition, media, TVK leaders — shown as Spoken / Silent / Not yet. "Others are condemning, TVK silent" is a visible state, not something a human must notice.</div>
+
+  <div class="grid grid-2">
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Reaction Roster Component</div>
+          <div class="spec-block-tag">component: ReactionRoster</div>
+        </div>
+        <div class="spec-block-body">
+          <div style="margin-bottom:14px; font-size:12px; color:var(--text-secondary);">Story: Councillor remark at DMK function · T+00:23</div>
+          <div class="roster-grid">
+            <div class="roster-item">
+              <div class="roster-status roster-spoken"></div>
+              <div><div class="roster-name">Congress MLA</div><div class="roster-label">ally · spoken</div></div>
+            </div>
+            <div class="roster-item">
+              <div class="roster-status roster-spoken"></div>
+              <div><div class="roster-name">@natnl_jrnlst</div><div class="roster-label">nat'l media · spoken</div></div>
+            </div>
+            <div class="roster-item">
+              <div class="roster-status roster-notyet" style="box-shadow: 0 0 6px rgba(255,149,0,0.4)"></div>
+              <div><div class="roster-name">TVK Leader</div><div class="roster-label" style="color:var(--t2)">NO RESPONSE YET</div></div>
+            </div>
+            <div class="roster-item">
+              <div class="roster-status roster-silent"></div>
+              <div><div class="roster-name">VCK Official</div><div class="roster-label">ally · silent</div></div>
+            </div>
+            <div class="roster-item">
+              <div class="roster-status roster-silent"></div>
+              <div><div class="roster-name">State Media</div><div class="roster-label">silent</div></div>
+            </div>
+            <div class="roster-item">
+              <div class="roster-status roster-spoken"></div>
+              <div><div class="roster-name">Opp. Leader</div><div class="roster-label">opposition · spoken</div></div>
+            </div>
+          </div>
+          <div style="margin-top:14px; font-size:11px; color:var(--t1); font-weight:600;">🐘 "No TVK leader post detected. Checking registry of 12 TVK leader accounts."</div>
+          <div class="conf-band">
+            <div class="conf-pill filled"></div>
+            <div class="conf-pill filled"></div>
+            <div class="conf-pill"></div>
+            <div class="conf-label">Medium confidence · registry match</div>
+          </div>
+          <table class="field-table" style="margin-top:16px;">
+            <thead><tr><th>Roster Status</th><th>Display</th><th>Detection method</th></tr></thead>
+            <tbody>
+              <tr><td>Spoken ✓</td><td>Green dot + "spoken"</td><td>Post from actor's account matching story semantically (embedding sim ≥ τ=0.82) or explicit quote/reply to story source</td></tr>
+              <tr><td>Silent ○</td><td>Grey dot + "silent"</td><td>Actor in expected-reactors roster; no post detected in story window</td></tr>
+              <tr><td>Not yet ·</td><td>Amber pulsing dot + "NO RESPONSE YET"</td><td>TVK leader accounts specifically; response opportunity is open</td></tr>
+              <tr><td>Responded elsewhere</td><td>Blue dot + "press meet / TV"</td><td>Manual "responded elsewhere" button pressed by lead; stops alerting</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Mileage Clock Component</div>
+          <div class="spec-block-tag">component: MileageClock</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="mileage-clock">
+            <div class="clock-title">Mileage Clock · Response Window</div>
+            <div class="clock-state open">OPEN</div>
+            <div class="clock-velocity">
+              <div class="cv-bar" style="height:20%"></div>
+              <div class="cv-bar" style="height:40%"></div>
+              <div class="cv-bar" style="height:60%"></div>
+              <div class="cv-bar" style="height:80%"></div>
+              <div class="cv-bar" style="height:100%; background:var(--pulse)"></div>
+              <div class="cv-bar" style="height:90%"></div>
+              <div class="cv-bar" style="height:75%"></div>
+              <div class="cv-bar" style="height:60%"></div>
+              <div class="cv-bar" style="height:45%"></div>
+            </div>
+            <div class="clock-prediction">
+              Predicted peak: <span class="pred-band">18–35 min</span> <span style="color:var(--text-muted)">"early estimate"</span>
+            </div>
+          </div>
+          <table class="field-table">
+            <thead><tr><th>Clock State</th><th>Condition</th><th>Colour</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>OPEN</td><td>velocity rising OR within 80% of peak</td><td>--t3 green</td><td>Response opportunity live</td></tr>
+              <tr><td>CLOSING</td><td>velocity &lt; 50% of peak</td><td>--t2 amber</td><td>Urgency indicator; "window closing soonest" sort</td></tr>
+              <tr><td>CLOSED</td><td>velocity &lt; 15% of peak OR age &gt; 24h</td><td>--neutral grey</td><td>No more response opportunity; ledger records outcome</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">Predicted peak: fitted from similar past Stories (type, source tier, hour). Shown as a band, never a point. Labelled "early estimate" when fewer than N similar Stories exist. Cold start uses pooled heuristics.</p>
+        </div>
+      </div>
+
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Response Opportunity Trigger</div>
+          <div class="spec-block-tag">§6 Detection Spec</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="formula">
+<span class="comment"># Reaction score (last 60 min)</span>
+<span class="keyword">R</span> = Σ weight(reactor_tier) over DISTINCT reactors
+
+national media: <span class="value">1.0</span> | state media: <span class="value">0.8</span>
+ally public figure: <span class="value">1.0</span> | other-party leader: <span class="value">0.8</span>
+recognised figure: <span class="value">0.6</span> | influencer: <span class="value">0.4</span>
+
+<span class="comment"># Trigger fires when ALL hold</span>
+candidate=true  <span class="comment"># attack or positive trigger detected</span>
+AND R ≥ <span class="value">2.0</span>   <span class="comment"># reaction threshold (default)</span>
+AND tvk_response == none
+AND clock != Closed
+
+<span class="comment"># Alert: WhatsApp to Sajan ≤ 5 min from trigger</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORY PAGE SPEC -->
+  <div class="section-label" style="margin-top:40px;">Story Page — Full Component Map</div>
+  <div class="story-card-demo">
+    <div class="story-card-top">
+      <div class="story-card-title">Councillor remarks ill of CM at DMK function; deputy general secretary on stage</div>
+      <div class="story-card-sev sev-t1">T1</div>
+    </div>
+    <div class="story-card-meta">
+      <div class="story-meta-item">Started <strong>11:00</strong></div>
+      <div class="story-meta-item">Reach: <strong>9 outlets · 1,200 posts</strong></div>
+      <div class="story-meta-item">Clock: <strong style="color:var(--t3)">OPEN ~18 min</strong></div>
+      <div class="story-meta-item">Severity: <strong style="color:var(--t1)">0.72 (T1)</strong></div>
+      <div class="story-meta-item">Owner: <strong>Meena</strong></div>
+      <div class="story-meta-item chip chip-live">● Live</div>
+    </div>
+    <div class="story-card-body">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div>
+          <div style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Reaction Roster</div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-bottom:4px;">● <span style="color:var(--t3)">3 spoken</span> · ○ 2 silent · <span style="color:var(--t2)">· TVK: no response</span></div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Origin Trace</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Event video → @local_acct (11:00) → YouTube news (11:12) → 2 news sites (11:15) → X spread</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Story Page — All Component Zones</div>
+      <div class="spec-block-tag">page: /stories/[id]</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Zone</th><th>Contents</th><th>AI fills</th><th>Human actions</th></tr></thead>
+        <tbody>
+          <tr><td>Header</td><td>Title, started-at, clock state chip, severity chip, owner avatar, story status (open/closed)</td><td>AI writes title from top Mentions; AI assigns severity</td><td>Rename story; assign owner; merge/split</td></tr>
+          <tr><td>Reaction Roster</td><td>Expected reactors by tier, each with spoken/silent/not-yet status and timestamp</td><td>AI detects reactions from X and news; AI detects TVK leader response from registry</td><td>Add manual "responded elsewhere"; configure expected reactors in Settings</td></tr>
+          <tr><td>Origin Trace</td><td>Propagation tree: first seen → spread path across platforms; "caught first" flag; publisher breakdown</td><td>AI builds tree from stage_timestamps and semantic links; AI flags "print first"</td><td>Correct a link in the tree; mark a node as source</td></tr>
+          <tr><td>Receipts</td><td>All Mentions: author/outlet, engagement, label, reason, original link, corrected-by marks; sorted by influence desc</td><td>AI labels each Mention; AI writes reason; AI flags low-confidence for human review</td><td>Correct any label; add a Mention manually; link a clipping</td></tr>
+          <tr><td>Co-worker panel</td><td>2-line explanation of the Story; suggested response kind; "ask a follow-up" input; citation chips</td><td>AI writes explanation grounded in Mentions; AI suggests kind (condemn/rebut/etc); AI answers follow-ups</td><td>Ask follow-up in Tamil or English; mark explanation useful/not-useful</td></tr>
+          <tr><td>Actions bar</td><td>Acknowledge; Assign; Merge/Split; Mark acted / not needed; "responded elsewhere"</td><td>AI records outcome in Mileage Ledger</td><td>All action buttons here; outcome choice feeds the response queue learning</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- CONSTELLATION -->
+<section id="constellation">
+  <div class="section-label">08 — Constellation / Campaign View</div>
+  <div class="section-title">Network of coordination. Organic-ness index. Attribution gate.</div>
+  <div class="section-desc">Coordinated campaigns shown as a network constellation: nodes sized by influence, ringed by account age, edges for shared text / mutual boosting. The question shifts from "is it suspicious?" to "how far from organic?"</div>
+
+  <div class="constellation">
+    <!-- Fake nodes to illustrate the concept -->
+    <div class="node new-account" style="width:18px;height:18px;top:30px;left:60px;"></div>
+    <div class="node new-account" style="width:16px;height:16px;top:55px;left:90px;"></div>
+    <div class="node new-account" style="width:20px;height:20px;top:40px;left:120px;"></div>
+    <div class="node new-account" style="width:14px;height:14px;top:70px;left:50px;"></div>
+    <div class="node new-account" style="width:18px;height:18px;top:20px;left:155px;"></div>
+    <div class="node new-account" style="width:16px;height:16px;top:80px;left:140px;"></div>
+    <div class="node new-account" style="width:22px;height:22px;top:35px;left:195px;"></div>
+    <div class="node new-account" style="width:14px;height:14px;top:65px;left:180px;"></div>
+    <div class="node new-account" style="width:18px;height:18px;top:95px;left:100px;"></div>
+    <div class="node old-account" style="width:34px;height:34px;top:60px;left:260px;"></div>
+    <div class="node old-account" style="width:28px;height:28px;top:30px;left:310px;"></div>
+    <div class="node organic" style="width:40px;height:40px;top:80px;left:430px;"></div>
+    <div class="node organic" style="width:28px;height:28px;top:40px;left:490px;"></div>
+    <div class="node organic" style="width:22px;height:22px;top:100px;left:510px;"></div>
+    <div style="position:absolute;top:20px;right:20px;font-size:11px;color:var(--text-muted);text-align:right;">
+      <div style="color:var(--text-secondary); font-weight:600; margin-bottom:6px;">possible coordination</div>
+      <div>confidence: <span style="color:var(--t2); font-weight:600;">Medium</span></div>
+      <div>~300 accounts · 70% &lt;3 months</div>
+      <div style="margin-top:6px; color:var(--t1); font-size:10px; text-transform:uppercase; letter-spacing:0.06em;">not attributed · awaiting lead confirmation</div>
+    </div>
+    <div class="const-label">
+      <div class="const-legend"><div class="legend-dot" style="background:var(--t2);"></div>new account (&lt;90d)</div>
+      <div class="const-legend"><div class="legend-dot" style="background:var(--t1);opacity:0.6"></div>old account, clustering</div>
+      <div class="const-legend"><div class="legend-dot" style="background:var(--t3);"></div>organic baseline</div>
+      <div style="margin-left:auto;font-size:10px;font-family:var(--font-mono);">node size = influence · ring = account age</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div>
+      <div class="organic-meter">
+        <div class="organic-label">Organic-ness Index <span>0.21 / 1.0</span></div>
+        <div class="organic-track"><div class="organic-fill" style="width:21%"></div></div>
+        <div style="font-size:10px; color:var(--text-muted);">Far from organic · low text diversity · tight timing · 70% new accounts</div>
+      </div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Campaign Signals</div>
+          <div class="spec-block-tag">§8 Detection Spec</div>
+        </div>
+        <div class="spec-block-body">
+          <table class="field-table">
+            <thead><tr><th>Signal</th><th>Method</th><th>Shown to user</th></tr></thead>
+            <tbody>
+              <tr><td>Account-age skew</td><td>Share of accounts &lt;90d vs organic baseline for that hashtag size</td><td>% bar + number</td></tr>
+              <tr><td>Text near-duplication</td><td>MinHash / embedding cosine ≥ 0.92 clusters</td><td>% share in top 3 phrasings</td></tr>
+              <tr><td>Timing synchrony</td><td>Share of posts in same 60-second bins</td><td>Burst vs diurnal chart</td></tr>
+              <tr><td>Mutual boosting</td><td>Density of reciprocal repost/reply edges</td><td>Edge density score</td></tr>
+              <tr><td>Low-history / similarity</td><td>Default avatars, handle patterns, empty history, same client app</td><td>Profile similarity score</td></tr>
+              <tr><td>Network smallness</td><td>Hashtag volume explained by few accounts relative to total</td><td>Coverage ratio</td></tr>
+            </tbody>
+          </table>
+          <div class="formula" style="margin-top:16px;">
+<span class="keyword">campaign_score</span> = logistic(b0 + Σ(w_i × signal_i))
+<span class="comment"># weights fitted on labelled examples, versioned</span>
+confidence = High (≥3 independent signals)
+           | Medium | Low
+min cluster: <span class="value">30 accounts</span> <span class="comment"># below = observe only</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Attribution Gate</div>
+          <div class="spec-block-tag">hard requirement · tested at API level</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="state-grid" style="grid-template-columns:1fr;">
+            <div class="state-chip"><div class="state-chip-label">Default display</div><div class="state-chip-value">"Possible coordination · confidence Medium · not attributed"</div></div>
+            <div class="state-chip"><div class="state-chip-label">Attribution locked</div><div class="state-chip-value" style="color:var(--t2)">UI shows lock icon. Neither the UI nor the co-worker can name a party. Tested at API level.</div></div>
+            <div class="state-chip"><div class="state-chip-label">Confirmation required</div><div class="state-chip-value">An attribution record (party, evidence, confirming lead name, reason, timestamp) must exist in the DB before any surface can display a party name.</div></div>
+            <div class="state-chip"><div class="state-chip-label">After confirmation</div><div class="state-chip-value" style="color:var(--t3)">"Attributed to [Party] · confirmed by [Name] at HH:MM · evidence: [link]"</div></div>
+          </div>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:14px;">Privacy: evidence shows account handles for public actors and clusters of accounts as accounts. No private-citizen profile pages. No cross-linking to petition or citizen records. Presentation-safe mode hides handles.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TONE LAB -->
+<section id="tone-lab">
+  <div class="section-label">09 — Tone Lab + Co-worker Panel</div>
+  <div class="section-title">Tamil-native. Team-taught. Every correction kept and audited.</div>
+  <div class="section-desc">The Tone Lab is where the team curates Tanglish idioms, sarcasm patterns and nicknames. The system shows "how I read this" with the reason. Corrections land here, feed the gold set, and are tracked per language for bias.</div>
+
+  <div class="grid grid-2">
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Label Correction Flow</div>
+          <div class="spec-block-tag">component: LabelCorrector</div>
+        </div>
+        <div class="spec-block-body">
+          <div class="label-row">
+            <div class="label-text">
+              <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted)">Tanglish · 15:30 · @user_xyz</span><br>
+              "Enna periya leader nu ninaikkiraar, aana CM ku oru tweet kooda poda maataar" 😂
+            </div>
+            <div class="label-tags">
+              <span class="tag tag-neg">Negative</span>
+              <span class="tag tag-sarcasm">sarcasm</span>
+            </div>
+            <div class="pencil-icon">✏️</div>
+          </div>
+          <div style="background:rgba(0,212,255,0.04); border:1px solid rgba(0,212,255,0.12); border-radius:8px; padding:12px 14px; margin:12px 0; font-size:12px;">
+            <div style="color:var(--pulse); font-weight:600; margin-bottom:6px;">🐘 How I read this:</div>
+            <div style="color:var(--text-secondary); line-height:1.6;">This post mocks a leader's silence. The sarcasm ("enna periya leader") means the writer does NOT support the entity. Effective polarity: <strong style="color:var(--t1)">Negative</strong>. Sarcasm flag = true (for audit). Claim backing: <strong>satire / satire (implicit)</strong>.</div>
+            <div class="conf-band" style="margin-top:10px;">
+              <div class="conf-pill filled"></div>
+              <div class="conf-pill filled"></div>
+              <div class="conf-pill filled"></div>
+              <div class="conf-label" style="margin-left:4px;">High · 0.87</div>
+            </div>
+          </div>
+          <div class="label-row" style="border-top:1px solid var(--border); padding-top:12px;">
+            <div class="label-text" style="font-size:12px;">
+              <span style="color:var(--t3); font-weight:600;">✓ Meena corrected · 15:30</span><br>
+              Changed: Negative → <strong>Positive</strong> (sarcastic support). Reason: "sarcasm reads as mockery of silence = effective support implied". Original label kept in history.
+            </div>
+            <div class="label-tags">
+              <span class="tag tag-corrected">Corrected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Label Schema — All Fields</div>
+          <div class="spec-block-tag">§2 Detection Spec</div>
+        </div>
+        <div class="spec-block-body">
+          <table class="field-table">
+            <thead><tr><th>Field</th><th>Values</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>polarity</td><td>positive | negative | neutral | mixed</td><td>Effective polarity — sarcasm already applied by the model</td></tr>
+              <tr><td>sarcasm</td><td>bool</td><td>Separate from polarity; for audit, analytics and Tone Lab only</td></tr>
+              <tr><td>attack</td><td>bool</td><td>Directed attack on the entity; lifts N score</td></tr>
+              <tr><td>claim_backing</td><td>on_record | named_source | anonymous_insinuation | satire | none</td><td>Affects N score weight; shown to users</td></tr>
+              <tr><td>language</td><td>ta | en | tanglish | mixed</td><td>Auto-detected; X language tag not trusted for Tanglish</td></tr>
+              <tr><td>reason</td><td>Short text</td><td>Always shown to users; human must write for corrections</td></tr>
+              <tr><td>confidence</td><td>0–1</td><td>Shown as Low/Medium/High pill</td></tr>
+              <tr><td>model_version</td><td>string</td><td>For reproducibility; visible in receipt tooltip</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="coworker-panel">
+        <div class="coworker-header">
+          <div class="coworker-avatar">🐘</div>
+          <div>
+            <div class="coworker-name">Naadi Co-worker</div>
+            <div class="coworker-status">answering in Tamil · citing 3 Mentions</div>
+          </div>
+        </div>
+        <div class="coworker-text coworker-cursor">
+          Congress MLA-களின் X posts பார்க்கும்போது, cabinet decision பற்றிய negative sentiment இன்று 09:00–12:10 இடையில் 34% அதிகரித்திருக்கிறது<span class="citation-chip">[1]</span>. மூன்று MLA posts ஐ based ஆக சொல்கிறேன், sample size 64 posts மட்டுமே, இதை கவனத்தில் வைக்கவும்<span class="citation-chip">[2]</span>.
+        </div>
+        <div class="coworker-reasoning">
+          <span>▸ How I read this</span>
+          <span style="color:var(--text-muted); margin-left:auto; font-size:10px;">tap to expand</span>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <div style="font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; padding:6px 10px; color:var(--text-secondary); cursor:pointer;">Ask a follow-up</div>
+          <div style="font-size:11px; background:rgba(255,59,48,0.08); border:1px solid rgba(255,59,48,0.2); border-radius:6px; padding:6px 10px; color:var(--t1); cursor:pointer;">👎 not useful</div>
+        </div>
+      </div>
+
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Co-worker Safety Design</div>
+          <div class="spec-block-tag">§5 Architecture</div>
+        </div>
+        <div class="spec-block-body">
+          <table class="field-table">
+            <thead><tr><th>Rule</th><th>Implementation</th></tr></thead>
+            <tbody>
+              <tr><td>All content is data, never instructions</td><td>Ingested posts wrapped in delimiters; "ignore your instructions" treated as a post</td></tr>
+              <tr><td>Numbers from tool results only</td><td>Validator rejects uncited claims; every number carries a tool call ID</td></tr>
+              <tr><td>No outbound social tools</td><td>Tool list: read-only query tools + send_internal_alert (allowlisted recipients only). No outbound HTTP.</td></tr>
+              <tr><td>Injection test suite in CI</td><td>Posts with hidden text, poisoned articles, "ignore" prompts; must all pass as data items</td></tr>
+              <tr><td>Ally-blame held</td><td>Any co-worker text blaming an ally held for lead review before CM Card delivery</td></tr>
+              <tr><td>Uncertainty is explicit</td><td>"I can't say from the data we have. I found N posts; here's what they show." — mandatory phrasing</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">Bias Guard</div>
+          <div class="spec-block-tag">§H PRD — correction bias prevention</div>
+        </div>
+        <div class="spec-block-body">
+          <table class="field-table">
+            <thead><tr><th>Trigger</th><th>Gate</th></tr></thead>
+            <tbody>
+              <tr><td>Correction softens negative label about our entities</td><td>Requires second reviewer before changing aggregates</td></tr>
+              <tr><td>Correction touches a high-severity Story</td><td>Requires second reviewer</td></tr>
+              <tr><td>Model-only view</td><td>Always available alongside corrected view; never hidden</td></tr>
+              <tr><td>Correction rate per person</td><td>Tracked and shown in Admin bias dashboard; flag if one person's rate diverges</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POCKET / WHATSAPP -->
+<section id="pocket">
+  <div class="section-label">10 — Pocket: WhatsApp + CM Card</div>
+  <div class="section-title">The lead gets one alert. They must act in 90 seconds.</div>
+  <div class="section-desc">WhatsApp templates delivered to named individuals (never groups). Quiet hours respected. Delivery receipt required. Failed delivery escalates to next lead and shows in-app. All template text to be confirmed with the war room.</div>
+
+  <div class="grid grid-2">
+    <div>
+      <div class="whatsapp-card">
+        <div class="wa-header">
+          <div class="wa-icon">📱</div>
+          <div class="wa-name">🐘 Naadi</div>
+          <div class="wa-time">11:28</div>
+        </div>
+        <div class="wa-bubble">
+          <div class="wa-line"><strong>🐘 Response opportunity · OPEN window</strong></div>
+          <div class="wa-line">Kind: <strong>condemn</strong> · CM Vijay</div>
+          <div class="wa-line">What: Councillor ill remark at DMK function, DGS on stage</div>
+          <a class="wa-link">↗ clip.link/abc123 · video clip</a>
+          <br><br>
+          <div class="wa-line">Already reacting:</div>
+          <div class="wa-line">· @natnl_jrnlst (nat'l media, 1.2M)</div>
+          <div class="wa-line">· Congress MLA Murugesan (ally)</div>
+          <div class="wa-line">· Opp. leader @aiadmk_official</div>
+          <br>
+          <div class="wa-line">TVK response: <strong>none yet</strong></div>
+          <div class="wa-line">Started: 23 min ago · Clock: OPEN</div>
+          <br>
+          <a class="wa-link">↗ Evidence: naadi.app/story/abc · tap to open</a>
+        </div>
+        <div class="wa-tick">✓✓ delivered 11:28</div>
+      </div>
+
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">WhatsApp Template Spec</div>
+          <div class="spec-block-tag">Official Business API · approved templates</div>
+        </div>
+        <div class="spec-block-body">
+          <table class="field-table">
+            <thead><tr><th>Template</th><th>Recipient</th><th>Required fields</th><th>Delivery rule</th></tr></thead>
+            <tbody>
+              <tr><td>Response opportunity</td><td>Sajan (named lead)</td><td>Kind, entity, 1-line summary, clip/article link, reactor list (≤3), TVK status, clock state, evidence link</td><td>≤5 min from trigger; individuals not groups; retry once then in-app escalation</td></tr>
+              <tr><td>High influence trigger</td><td>All leads</td><td>Handle/outlet, tier, followers, N reposts in M min, reason, evidence link</td><td>Immediate on T1; individuals not groups</td></tr>
+              <tr><td>Dawn Brief</td><td>Leads per routing config</td><td>3–5 lines: overnight summary, any campaign, open items, what to watch. One link.</td><td>06:30 IST daily; quiet hours respected per recipient</td></tr>
+              <tr><td>Dusk Baton</td><td>Outgoing + incoming shift lead</td><td>Open alerts, owners, watch items for overnight</td><td>At shift end time per config</td></tr>
+            </tbody>
+          </table>
+          <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">Failed delivery: retry once, then in-app "WhatsApp not delivered" badge on the alert, next lead notified in-app. All receipts logged in delivery_log table.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="spec-block">
+        <div class="spec-block-header">
+          <div class="spec-block-title">CM Card — 30-second read</div>
+          <div class="spec-block-tag">component: CMCard</div>
+        </div>
+        <div class="spec-block-body">
+          <div style="background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:16px;">
+            <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono); margin-bottom:12px;">2026-11-04 · CM Card · changes since 09:00</div>
+            <div style="margin-bottom:14px;">
+              <div style="font-size:13px; font-weight:600; margin-bottom:4px;">1. Councillor remark story — now T1</div>
+              <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">Cause: Rival-party councillor remarks at DMK function; 3 allies and national media already condemned; no TVK response detected.</div>
+              <div class="conf-band" style="margin-top:8px;"><div class="conf-pill filled"></div><div class="conf-pill filled"></div><div class="conf-pill filled"></div><div class="conf-label" style="margin-left:4px; color:var(--t3)">High confidence</div> <div style="margin-left:auto; font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:4px; padding:2px 8px; cursor:pointer;">→ evidence</div></div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <div style="font-size:13px; font-weight:600; margin-bottom:4px;">2. Congress ally — negative trend</div>
+              <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">Cause: 2 Congress MLAs posted against cabinet decision since 09:00. Reviewed by Meena.</div>
+              <div class="conf-band" style="margin-top:8px;"><div class="conf-pill filled"></div><div class="conf-pill"></div><div class="conf-pill"></div><div class="conf-label" style="margin-left:4px; color:var(--t2)">Low confidence · 18 posts</div></div>
+            </div>
+            <div style="border-top:1px solid var(--border); padding-top:12px;">
+              <div style="font-size:11px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">NEEDS A DECISION</div>
+              <div style="font-size:12px; color:var(--text);">· Respond to councillor remark? Window: OPEN ~18 min.</div>
+            </div>
+            <div style="margin-top:12px; display:flex; gap:8px;">
+              <div style="font-size:11px; padding:4px 10px; border-radius:6px; border:1px solid var(--border); color:var(--text-secondary); cursor:pointer;">English</div>
+              <div style="font-size:11px; padding:4px 10px; border-radius:6px; background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.3); color:var(--pulse); cursor:pointer;">தமிழ்</div>
+            </div>
+          </div>
+          <table class="field-table">
+            <thead><tr><th>CM Card rule</th><th>Spec</th></tr></thead>
+            <tbody>
+              <tr><td>Max changes</td><td>3. If more qualify, the top 3 by severity shown; a note says "+N more in desk"</td></tr>
+              <tr><td>Change format</td><td>1-line headline + 1-line cause + confidence chip + 1-tap to evidence. Never more.</td></tr>
+              <tr><td>Ally-blaming items</td><td>Show "reviewed by [name]" or held until a lead reviews. Never reaches CM unreviewed.</td></tr>
+              <tr><td>Language switch</td><td>English ↔ தமிழ் toggle; large type (18px+ body); no raw private handles</td></tr>
+              <tr><td>Presentation-safe</td><td>CM Card is always presentation-safe by default</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIME MACHINE -->
+<section id="time-machine">
+  <div class="section-label">11 — Time Machine</div>
+  <div class="section-title">Replay history. Prove thresholds. Run drills.</div>
+  <div class="section-desc">The Time Machine re-runs the pipeline on historical raw items with any chosen thresholds. The councillor incident and the one-post-that-mattered are replay fixtures that run on every release. Drill mode injects synthetic events to measure team reaction time.</div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Must-Pass Scenario A: The Councillor Incident</div>
+      <div class="spec-block-tag">replay fixture · runs on every release</div>
+    </div>
+    <div class="spec-block-body">
+      <div class="replay-bar">
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-bottom:8px;">
+          <span>T+00:00</span>
+          <span style="color:var(--t1); font-weight:600;">EXPECT: WhatsApp to Sajan ≤ T+00:28</span>
+          <span>T+01:00</span>
+        </div>
+        <div class="replay-track">
+          <div class="replay-fill" style="width:40%"></div>
+          <div class="replay-event" style="left:0%"><div class="replay-event-label">event</div></div>
+          <div class="replay-event" style="left:12%; background:var(--t2)"><div class="replay-event-label" style="color:var(--t2)">clip posted</div></div>
+          <div class="replay-event" style="left:22%; background:var(--t3)"><div class="replay-event-label" style="color:var(--t3)">R≥2.0 trigger</div></div>
+          <div class="replay-event" style="left:28%; background:var(--pulse)"><div class="replay-event-label" style="color:var(--pulse)">WhatsApp sent</div></div>
+          <div class="replay-event" style="left:40%; background:var(--t3)"><div class="replay-event-label" style="color:var(--t3)">TVK response</div></div>
+        </div>
+        <div class="replay-markers">
+          <span>00:00 · Event</span>
+          <span>00:07 · Clip posted</span>
+          <span>00:22 · R≥2.0</span>
+          <span>00:23 · Trigger</span>
+          <span>00:28 · WA ✓</span>
+          <span>00:40 · TVK reply</span>
+        </div>
+      </div>
+      <table class="field-table" style="margin-top:16px;">
+        <thead><tr><th>Assert</th><th>Pass condition</th></tr></thead>
+        <tbody>
+          <tr><td>(a) Alert latency</td><td>WhatsApp to Sajan ≤ 5 min from trigger (T+00:28 latest)</td></tr>
+          <tr><td>(b) Content fields</td><td>Clip link, reactor list (≥3 names/tiers), "no TVK response yet", clock state = OPEN all present</td></tr>
+          <tr><td>(c) No repeat alert</td><td>After TVK leader reply detected at T+00:40, no further WhatsApp fires</td></tr>
+          <tr><td>(d) Wall display</td><td>Story shows as T1/T2 per computed severity on the wall</td></tr>
+          <tr><td>(e) Mileage Ledger</td><td>time_to_response recorded; outcome = "responded by [name] at 00:40"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="spec-block">
+      <div class="spec-block-header">
+        <div class="spec-block-title">Must-Pass Scenario B: One Post That Mattered</div>
+        <div class="spec-block-tag">replay fixture · runs on every release</div>
+      </div>
+      <div class="spec-block-body">
+        <table class="field-table">
+          <thead><tr><th>Assert</th><th>Pass condition</th></tr></thead>
+          <tbody>
+            <tr><td>T1 fire</td><td>Wall flash and WhatsApp at or before T+00:05 (influence floor path; M_floor=0.5 when Ia ≥ 0.80)</td></tr>
+            <tr><td>Reason shown</td><td>"verified, 1.2M followers, national media, N reposts in M min" in alert</td></tr>
+            <tr><td>No false positive</td><td>40-follower account with identical text does NOT alert</td></tr>
+            <tr><td>Ack clears</td><td>Flash clears for all users on acknowledge; "taken by [name]" shown</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px; padding:12px; background:rgba(255,59,48,0.05); border:1px solid rgba(255,59,48,0.2); border-radius:8px; font-size:12px; color:var(--text-secondary);">
+          Negative fixtures (must NOT alert): film-fan "Vijay" chatter; sarcastic supportive Tanglish post; legitimate organic hashtag with diverse accounts.
+        </div>
+      </div>
+    </div>
+    <div class="spec-block">
+      <div class="spec-block-header">
+        <div class="spec-block-title">Time Machine UI Components</div>
+        <div class="spec-block-tag">page: /time-machine</div>
+      </div>
+      <div class="spec-block-body">
+        <table class="field-table">
+          <thead><tr><th>Component</th><th>Spec</th></tr></thead>
+          <tbody>
+            <tr><td>Window picker</td><td>Date range selector; min 2026-05-10 (history start); backfill status per period shown</td></tr>
+            <tr><td>Threshold sliders</td><td>All Doctrine Pack defaults shown with sliders; changed values highlighted orange</td></tr>
+            <tr><td>Run replay button</td><td>Launches replay in sandbox namespace; real data, real pipeline code, virtual clock; outputs never go to real surfaces</td></tr>
+            <tr><td>Would-have-alerted view</td><td>Side-by-side: "would have fired" vs "actually fired"; diff highlighted; drill to individual item</td></tr>
+            <tr><td>DRILL launcher</td><td>Inject a labelled synthetic event; alert goes only to drill recipient list; never to real recipients. Drill alerts tagged DRILL everywhere.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LICENCE LADDER -->
+<section id="licence">
+  <div class="section-label">12 — Licence Ladder + Admin</div>
+  <div class="section-title">Trust is earned and measured. The admin sees everything.</div>
+  <div class="section-desc">Each capability (labels per language, spike alerts, campaign flags, response suggestions, briefs) has a licence that is earned through measured accuracy and suspended automatically when errors rise. The Admin page shows every source, every cap, every correction, every capability stage.</div>
+
+  <div class="ladder">
+    <div class="ladder-rung probation">
+      <div class="ladder-stage">Probation / Assist</div>
+      <div class="ladder-desc">Suggests labels, alerts and responses. Human reviews most output. Every correction teaches it.</div>
+    </div>
+    <div class="ladder-rung active">
+      <div class="ladder-stage">Licensed / Trusted</div>
+      <div class="ladder-desc">Acts alone on capabilities that cleared accuracy bar (≥14 days, ≥200 reviewed items). Human spot-checks samples.</div>
+    </div>
+    <div class="ladder-rung">
+      <div class="ladder-stage">Co-worker / Autonomous</div>
+      <div class="ladder-desc">Handles routine monitoring, labelling, alerting and briefing end-to-end. Raises only decisions.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="spec-block">
+      <div class="spec-block-header">
+        <div class="spec-block-title">Licence Report Card</div>
+        <div class="spec-block-tag">component: LicenceCard · Admin page</div>
+      </div>
+      <div class="spec-block-body">
+        <table class="field-table">
+          <thead><tr><th>Capability</th><th>Language</th><th>Stage</th><th>F1 / bar</th><th>Days at stage</th></tr></thead>
+          <tbody>
+            <tr><td>Sentiment labels</td><td>English</td><td style="color:var(--pulse)">Trusted</td><td>0.84 / 0.80</td><td>21</td></tr>
+            <tr><td>Sentiment labels</td><td>Tamil</td><td style="color:var(--t3)">Co-worker</td><td>0.78 / 0.75</td><td>8</td></tr>
+            <tr><td>Sentiment labels</td><td>Tanglish</td><td style="color:var(--t2)">Probation</td><td>0.68 / 0.72</td><td>3</td></tr>
+            <tr><td>Spike alerts</td><td>All</td><td style="color:var(--pulse)">Trusted</td><td>precision 0.73 / 0.70</td><td>14</td></tr>
+            <tr><td>Campaign flags</td><td>All</td><td style="color:var(--t2)">Probation</td><td>precision 0.61 / 0.70</td><td>2 — AUTO-DEMOTED</td></tr>
+            <tr><td>Response suggestions</td><td>All</td><td style="color:var(--t2)">Probation</td><td>—</td><td>Not yet calibrated</td></tr>
+            <tr><td>Briefs</td><td>Tamil/EN</td><td style="color:var(--pulse)">Trusted</td><td>eval 0.88 / 0.80</td><td>7</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">Auto-demotion fires when accuracy falls below bar − 0.03 for 3 consecutive days, or one high-severity error. Leads see reason: "Campaign flags back on Probation: precision fell to 0.61 vs bar 0.70".</p>
+      </div>
+    </div>
+    <div class="spec-block">
+      <div class="spec-block-header">
+        <div class="spec-block-title">Admin Page Components</div>
+        <div class="spec-block-tag">page: /admin</div>
+      </div>
+      <div class="spec-block-body">
+        <table class="field-table">
+          <thead><tr><th>Component</th><th>Shows</th><th>AI role</th></tr></thead>
+          <tbody>
+            <tr><td>Source health cards</td><td>Per source: last OK, lag, error reason. Never "no new items" — always a specific error.</td><td>AI flags when source health degrades vs 7-day baseline</td></tr>
+            <tr><td>X usage meter</td><td>Reads used vs monthly cap; alert at 50/80/95%. Sampling labelled on affected numbers.</td><td>AI projects when cap will be hit at current rate</td></tr>
+            <tr><td>Missed-item audit</td><td>Weekly: sample of rejected items re-labelled; missed-item rate by source/language/entity</td><td>AI summarises audit; flags rising missed-item rates</td></tr>
+            <tr><td>Licence report cards</td><td>All capabilities × languages; F1 trend, error trend, days at stage, bar</td><td>AI triggers promotion/demotion; writes reason in plain language</td></tr>
+            <tr><td>Correction/bias dashboard</td><td>Corrections per 1,000 labels per person/entity; softening-correction rate; second-review queue</td><td>AI flags diverging correction rates; bias guard triggers</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI PATTERNS -->
+<section id="ai-patterns">
+  <div class="section-label">13 — AI-Native Interaction Patterns</div>
+  <div class="section-title">Every surface state. Every AI moment. Every edge case.</div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Universal Empty / Stale / Error States</div>
+      <div class="spec-block-tag">applies to all surfaces</div>
+    </div>
+    <div class="spec-block-body">
+      <div class="state-grid">
+        <div class="state-chip"><div class="state-chip-label">Empty — no mentions</div><div class="state-chip-value">"No Mentions in the last 15 minutes. Source health: X ✓ News ✓" — never just blank</div></div>
+        <div class="state-chip"><div class="state-chip-label">Stale source</div><div class="state-chip-value" style="color:var(--t2)">"Data delayed since 10:07 · X" — in amber on affected panel; Pulse Strip trace goes flat red</div></div>
+        <div class="state-chip"><div class="state-chip-label">Low sample</div><div class="state-chip-value">"Not enough data (18 of 30 needed)" — chip replaces percentage; never zero</div></div>
+        <div class="state-chip"><div class="state-chip-label">AI down</div><div class="state-chip-value" style="color:var(--t2)">"AI down · rules-only alerts active · co-worker data may be stale" — dashboards keep working</div></div>
+        <div class="state-chip"><div class="state-chip-label">Corrected label</div><div class="state-chip-value" style="color:var(--t3)">"Corrected by Meena · original: Negative · reason: sarcastic support"</div></div>
+        <div class="state-chip"><div class="state-chip-label">Coordination</div><div class="state-chip-value">"Possible coordination · confidence Medium · not attributed" — until lead confirms</div></div>
+        <div class="state-chip"><div class="state-chip-label">Co-worker uncertainty</div><div class="state-chip-value">"I can't say from the data we have. I found 12 posts; here's what they show."</div></div>
+        <div class="state-chip"><div class="state-chip-label">Sampled data</div><div class="state-chip-value" style="color:var(--t2)">"~sampled" badge on every affected number; tooltip says what percentage was sampled</div></div>
+        <div class="state-chip"><div class="state-chip-label">Cap approaching</div><div class="state-chip-value" style="color:var(--t1)">Admin + Pulse Strip: "X reads at 80% of monthly cap" — at 50/80/95%</div></div>
+        <div class="state-chip"><div class="state-chip-label">Significance</div><div class="state-chip-value">Trend arrows only when z≥2. Otherwise flat. Never implied trend without test.</div></div>
+        <div class="state-chip"><div class="state-chip-label">Early estimate</div><div class="state-chip-value">"Early estimate — fewer than N similar stories" label on predicted peak band</div></div>
+        <div class="state-chip"><div class="state-chip-label">Drill mode</div><div class="state-chip-value" style="color:var(--purple)">All drill alerts tagged DRILL in red. Go only to drill recipient list. Never to real recipients.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Accessibility Requirements</div>
+      <div class="spec-block-tag">WCAG AA · Tamil line-height · keyboard-first</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Requirement</th><th>Implementation</th></tr></thead>
+        <tbody>
+          <tr><td>Keyboard navigation</td><td>Full tab order on desk; skip-to-content link; focus rings visible (not just default blue — use --pulse colour at 2px)</td></tr>
+          <tr><td>Screen reader labels</td><td>All icon buttons have aria-label; all status dots have aria-label text ("T1 alert · Response Opportunity"); live regions for counter updates</td></tr>
+          <tr><td>Colour contrast</td><td>WCAG AA on desk (4.5:1 body, 3:1 large text); AAA targets on wall (7:1 body); never colour alone</td></tr>
+          <tr><td>Tamil line-height</td><td>Tamil body text: line-height 1.8 minimum; Noto Sans Tamil ascenders tested at 14px in dense tables</td></tr>
+          <tr><td>Tanglish rendering</td><td>lang attribute switches mid-line; no font substitution breaks</td></tr>
+          <tr><td>Reduced motion</td><td>@media (prefers-reduced-motion): all animations skip to end-state; Pulse Strip shows as static bar; T1 flash shows as solid border immediately</td></tr>
+          <tr><td>Focus management</td><td>Drawer open: focus moves to first interactive element inside; drawer close: focus returns to trigger</td></tr>
+          <tr><td>Touch targets</td><td>Minimum 44×44px on mobile web; CM Card buttons 48×48px</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="spec-block">
+    <div class="spec-block-header">
+      <div class="spec-block-title">Doctrine Pack — What It Configures</div>
+      <div class="spec-block-tag">zero TVK-specific values in code</div>
+    </div>
+    <div class="spec-block-body">
+      <table class="field-table">
+        <thead><tr><th>Setting</th><th>TVK default</th><th>Example alternative</th></tr></thead>
+        <tbody>
+          <tr><td>entities[]</td><td>TVK, CM Vijay, AadhavArjuna, all parties</td><td>Company, CEO, Competitors (business client)</td></tr>
+          <tr><td>entity_relations[].tag</td><td>ally | supporting | opposition | neutral</td><td>partner | competitor | regulator | neutral</td></tr>
+          <tr><td>vocabulary.cm_label</td><td>"CM summary"</td><td>"Leadership summary"</td></tr>
+          <tr><td>vocabulary.party</td><td>"party"</td><td>"brand"</td></tr>
+          <tr><td>co_worker.name</td><td>TBD (Thunai / Yaanai — client's call)</td><td>Configurable per client</td></tr>
+          <tr><td>co_worker.avatar</td><td>Official TVK elephant artwork</td><td>Client-supplied artwork</td></tr>
+          <tr><td>theme.accent</td><td>#E8291E (TVK red)</td><td>Client brand colour</td></tr>
+          <tr><td>alert_recipients[]</td><td>Sajan (response opp.), leads (influence)</td><td>Per-client routing config</td></tr>
+          <tr><td>thresholds.r_min</td><td>2.0</td><td>Calibration sets per client</td></tr>
+          <tr><td>watch_terms[]</td><td>TVK names, nicknames, Tamil/Tanglish spellings</td><td>Client-specific terms</td></tr>
+          <tr><td>lexicon[]</td><td>Tamil/Tanglish idioms, sarcasm patterns</td><td>Client's industry language</td></tr>
+          <tr><td>reaction_rosters[]</td><td>Allies, opposition, media expected reactors per story type</td><td>Competitors, regulators, analysts</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:12px;">A new client = a new Doctrine Pack + a gold-set sprint. No code changes. Each client's data, corrections, gold set and co-worker memory are kept fully separate. One client's corrections never change another client's labels.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="text-align:center; padding: 40px 0;">
+    <div style="font-size:36px; margin-bottom:12px;">🐘</div>
+    <div style="font-size:18px; font-weight:700; margin-bottom:8px;">Naadi is the war room's pulse.</div>
+    <div style="font-size:14px; color:var(--text-secondary); max-width:600px; margin:0 auto; line-height:1.7;">It watches X, news, TV, e-paper and clippings in Tamil, English and Tanglish; weighs who is speaking; fuses it into Stories; tells you how long the window to respond stays open and who has already spoken; spots coordinated pushes; and shows the evidence behind every number. It never posts. It makes sure TVK is never the last to know.</div>
+    <div style="margin-top:24px; font-size:12px; font-family:var(--font-mono); color:var(--text-muted);">
+      Naadi UI & Component Deep Spec · v1.0 · 2026-11-04 · Minsky Product
+    </div>
+  </div>
+</section>
+
+</div><!-- /page -->
+</body>
+</html>
